@@ -1,17 +1,21 @@
 import Html exposing (Html, button, div, text)
-import Html.App as Html
+import Html.App as App
 import Html.Events exposing (onClick)
 import Random exposing (Seed)
+import Result
+import String
+import WebSocket
 
 import Utils
 
+
 main =
-  Html.program
-  { init = init
-  , view = view
-  , subscriptions = subscriptions
-  , update = update
-  }
+  App.program
+    { init = init
+    , update = update
+    , subscriptions = subscriptions
+    , view = view
+    }
 
 
 -- MODEL
@@ -20,12 +24,17 @@ type alias Model =
   { numbers : List Int
   }
 
+init : (Model, Cmd Msg)
+init =
+  (Model [1..90], Cmd.none)
+
 
 -- UPDATE
 
 type Msg
   = Extract
   | Pop Int
+  | NewMessage String
   | Stop
 
 update : Msg -> Model -> (Model, Cmd Msg)
@@ -35,10 +44,20 @@ update msg model =
       (model, Random.generate Pop (Random.int 0 (List.length model.numbers - 1)))
 
     Pop index ->
-      (Model (List.filter (\elem -> elem /= Utils.at model.numbers index) model.numbers), Cmd.none)
+      (model, WebSocket.send "ws://echo.websocket.org" (Utils.at model.numbers index |> toString))
+
+    NewMessage popped ->
+      (Model (List.filter (\elem -> elem /= Result.withDefault 0 (String.toInt popped)) model.numbers), Cmd.none)
 
     Stop ->
       (Model [1..90], Cmd.none)
+
+
+-- SUBSCRIPTIONS
+
+subscriptions : Model -> Sub Msg
+subscriptions model =
+  WebSocket.listen "ws://echo.websocket.org" NewMessage
 
 
 -- VIEW
@@ -50,17 +69,3 @@ view model =
     , div [] [ text (toString (Utils.selectedNumbers model.numbers)) ]
     , button [ onClick Stop ] [ text "Stop" ]
     ]
-
-
--- SUBSCRIPTIONS
-
-subscriptions : Model -> Sub Msg
-subscriptions model =
-  Sub.none
-
-
--- INIT
-
-init : (Model, Cmd Msg)
-init =
-  (Model [1..90], Cmd.none)
