@@ -2,6 +2,7 @@ module Utils exposing (at, selectedNumbers)
 
 import Maybe
 
+
 at : List Int -> Int -> Int
 at list index =
   Maybe.withDefault 0 (List.drop index list |> List.head)
