@@ -1,0 +1,76 @@
+var _user$project$Core$Model = function (a) {
+	return {numbers: a};
+};
+var _user$project$Core$init = {
+	ctor: '_Tuple2',
+	_0: _user$project$Core$Model(
+		_elm_lang$core$Native_List.range(1, 90)),
+	_1: _elm_lang$core$Platform_Cmd$none
+};
+var _user$project$Core$interpretMessage = F2(
+	function (msg, model) {
+		var intMsg = A2(
+			_elm_lang$core$Result$withDefault,
+			0,
+			_elm_lang$core$String$toInt(msg));
+		return _elm_lang$core$Native_Utils.eq(intMsg, 0) ? _user$project$Core$Model(
+			_elm_lang$core$Native_List.range(1, 90)) : _user$project$Core$Model(
+			A2(
+				_elm_lang$core$List$filter,
+				function (elem) {
+					return !_elm_lang$core$Native_Utils.eq(elem, intMsg);
+				},
+				model.numbers));
+	});
+var _user$project$Core$Stop = {ctor: 'Stop'};
+var _user$project$Core$NewMessage = function (a) {
+	return {ctor: 'NewMessage', _0: a};
+};
+var _user$project$Core$subscriptions = function (model) {
+	return A2(_elm_lang$websocket$WebSocket$listen, 'ws://localhost:4080', _user$project$Core$NewMessage);
+};
+var _user$project$Core$Pop = function (a) {
+	return {ctor: 'Pop', _0: a};
+};
+var _user$project$Core$update = F2(
+	function (msg, model) {
+		var _p0 = msg;
+		switch (_p0.ctor) {
+			case 'Extract':
+				return {
+					ctor: '_Tuple2',
+					_0: model,
+					_1: A2(
+						_elm_lang$core$Random$generate,
+						_user$project$Core$Pop,
+						A2(
+							_elm_lang$core$Random$int,
+							0,
+							_elm_lang$core$List$length(model.numbers) - 1))
+				};
+			case 'Pop':
+				return {
+					ctor: '_Tuple2',
+					_0: model,
+					_1: A2(
+						_elm_lang$websocket$WebSocket$send,
+						'ws://localhost:4080',
+						_elm_lang$core$Basics$toString(
+							A2(_user$project$Utils$at, model.numbers, _p0._0)))
+				};
+			case 'NewMessage':
+				return {
+					ctor: '_Tuple2',
+					_0: A2(_user$project$Core$interpretMessage, _p0._0, model),
+					_1: _elm_lang$core$Platform_Cmd$none
+				};
+			default:
+				return {
+					ctor: '_Tuple2',
+					_0: _user$project$Core$Model(
+						_elm_lang$core$Native_List.range(1, 90)),
+					_1: A2(_elm_lang$websocket$WebSocket$send, 'ws://localhost:4080', 'stop')
+				};
+		}
+	});
+var _user$project$Core$Extract = {ctor: 'Extract'};
