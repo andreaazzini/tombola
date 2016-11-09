@@ -1,0 +1,17 @@
+var _user$project$Utils$selectedNumbers = function (list) {
+	return A2(
+		_elm_lang$core$List$filter,
+		function (elem) {
+			return _elm_lang$core$Basics$not(
+				A2(_elm_lang$core$List$member, elem, list));
+		},
+		_elm_lang$core$Native_List.range(1, 90));
+};
+var _user$project$Utils$at = F2(
+	function (list, index) {
+		return A2(
+			_elm_lang$core$Maybe$withDefault,
+			0,
+			_elm_lang$core$List$head(
+				A2(_elm_lang$core$List$drop, index, list)));
+	});
